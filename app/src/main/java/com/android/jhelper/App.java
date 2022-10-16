@@ -32,8 +32,10 @@ public class App extends AppCompatActivity {
 
         Dictionary.setContext(this);
         Dictionary.setWordsLayout(findViewById(R.id.words_dict_layout));
+        Dictionary.setMarkersLayout(findViewById(R.id.markers_dict_layout));
 
         db.loadWords();
+        db.loadMarkers();
 
         findViewById(R.id.add_element).setOnClickListener(v -> {
             newElem();
@@ -188,7 +190,17 @@ public class App extends AppCompatActivity {
     }
 
     private void addMarker() {
+        EditText marker = findViewById(R.id.marker_text);
+        EditText using = findViewById(R.id.using_text);
+        Dictionary.addMarker(
+                marker.getText().toString(),
+                parseString(using.getText().toString())
+        );
 
+        db.addMarker(
+                marker.getText().toString(),
+                using.getText().toString()
+        );
     }
 
     private void addKanji() {

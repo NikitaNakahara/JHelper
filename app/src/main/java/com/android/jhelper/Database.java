@@ -14,9 +14,14 @@ import java.util.regex.Pattern;
 
 public class Database extends SQLiteOpenHelper {
     private final String WORDS_TABLE_NAME = "WORDS";
+    private final String MARKERS_TABLE_NAME = "MARKERS";
+
     private final String W_JAP_TEXT_COL = "JAP";
     private final String W_RUS_TEXT_COL = "RUS";
     private final String W_DESC_TEXT_COL = "DESCRIPTION";
+
+    private final String M_TEXT_COL = "TEXT";
+    private final String M_USING_COL = "USING_COL";
 
     public Database(@Nullable Context context) {
         super(context, "dictionary.db", null, 1);
@@ -31,11 +36,19 @@ public class Database extends SQLiteOpenHelper {
                 W_DESC_TEXT_COL + " TEXT" +
                 ");"
         );
+
+        db.execSQL("CREATE TABLE " + MARKERS_TABLE_NAME +
+                "(" +
+                M_TEXT_COL + " TEXT," +
+                M_USING_COL + " TEXT" +
+                ");"
+        );
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + WORDS_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + MARKERS_TABLE_NAME);
         onCreate(db);
     }
 
@@ -46,6 +59,14 @@ public class Database extends SQLiteOpenHelper {
         map.put(W_DESC_TEXT_COL, description);
 
         getWritableDatabase().insert(WORDS_TABLE_NAME, null, map);
+    }
+
+    public void addMarker(String text, String using) {
+        ContentValues map = new ContentValues();
+        map.put(M_TEXT_COL, text);
+        map.put(M_USING_COL, using);
+
+        getWritableDatabase().insert(MARKERS_TABLE_NAME, null, map);
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -82,6 +103,41 @@ public class Database extends SQLiteOpenHelper {
                         strings[0],
                         Pattern.compile("/").split(strings[1]),
                         strings[2]
+                );
+            }
+        }.execute();
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    public void loadMarkers() {
+        Cursor cursor = getReadableDatabase().rawQuery(
+                "SELECT " + M_TEXT_COL +
+                        ", " + M_USING_COL +
+                        " FROM " + MARKERS_TABLE_NAME,
+                null);
+
+        new AsyncTask<Void, String, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                if(cursor.moveToFirst()) {
+                    do {
+                        int textIndex = cursor.getColumnIndex(M_TEXT_COL);
+                        int usingIndex = cursor.getColumnIndex(M_USING_COL);
+                        String text = cursor.getString(textIndex);
+                        String using = cursor.getString(usingIndex);
+
+                        publishProgress(text, using);
+                    } while (cursor.moveToNext());
+                }
+
+                return null;
+            }
+
+            @Override
+            protected void onProgressUpdate(String... strings) {
+                Dictionary.addMarker(
+                        strings[0],
+                        strings[1]
                 );
             }
         }.execute();

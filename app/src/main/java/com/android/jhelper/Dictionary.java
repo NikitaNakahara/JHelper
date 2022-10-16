@@ -13,15 +13,14 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class Dictionary {
-    private static ArrayList<Map<String, String>> words;
-    private static ArrayList<Map<String, String>> markers;
-    private static ArrayList<Map<String, String>> kanji;
 
     private static Context context;
     private static LinearLayout wordsLayout;
+    private static LinearLayout markersLayout;
 
     public static void setContext(Context _context) { context = _context; }
     public static void setWordsLayout(LinearLayout _layout) { wordsLayout = _layout; }
+    public static void setMarkersLayout(LinearLayout _layout) { markersLayout = _layout; }
 
 
     public static void addWord(String text, String[] translations, String description) {
@@ -100,8 +99,57 @@ public class Dictionary {
         wordsLayout.addView(elemLayout, 0);
     }
 
-    public static void addMarker() {
+    public static void addMarker(String text, String[] using) {
+        LinearLayout elemLayout = createLayout();
 
+        TextView marker = new TextView(context);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        marker.setLayoutParams(params);
+        marker.setText(text);
+        marker.setTextSize(23);
+
+        elemLayout.addView(marker);
+
+
+        LinearLayout usingLayout = new LinearLayout(context);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        usingLayout.setLayoutParams(layoutParams);
+        usingLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+        TextView usingHeader = new TextView(context);
+        usingHeader.setLayoutParams(params);
+        usingHeader.setText("применение: ");
+        usingHeader.setTextSize(17);
+
+        usingLayout.addView(usingHeader);
+
+        TextView usingView = new TextView(context);
+        usingView.setLayoutParams(params);
+        usingView.setTextSize(17);
+        usingView.setTextColor(Color.parseColor("#515253"));
+
+        StringBuilder usingText = new StringBuilder();
+        for (int i = 0; i < using.length; i++) {
+            if (i == 0) {
+                usingText.append(using[i]);
+            } else {
+                usingText.append(", ").append(using[i]);
+            }
+        }
+
+        usingView.setText(usingText);
+
+        usingLayout.addView(usingView);
+
+        elemLayout.addView(usingLayout);
+
+        markersLayout.addView(elemLayout, 0);
     }
 
 
