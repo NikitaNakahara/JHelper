@@ -9,11 +9,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.ViewFlipper;
 
 import java.util.regex.Pattern;
 
 public class App extends AppCompatActivity {
+    Database db = new Database(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,9 +33,63 @@ public class App extends AppCompatActivity {
         Dictionary.setContext(this);
         Dictionary.setWordsLayout(findViewById(R.id.words_dict_layout));
 
+        db.loadWords();
+
         findViewById(R.id.add_element).setOnClickListener(v -> {
             newElem();
         });
+
+        Button[] dictModeButtons = new Button[] {
+                findViewById(R.id.words_dict),
+                findViewById(R.id.markers_dict),
+                findViewById(R.id.kanji_dict)
+        };
+
+        RelativeLayout.LayoutParams activeParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        activeParams.setMargins(0, dpToPx(103), 0, 0);
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+
+        ScrollView wordDict = findViewById(R.id.words_scroll);
+        ScrollView markerDict = findViewById(R.id.markers_scroll);
+        ScrollView kanjiDict = findViewById(R.id.kanji_scroll);
+
+        for (Button dictModeButton : dictModeButtons) {
+            dictModeButton.setOnClickListener(v -> {
+                for (Button button : dictModeButtons) {
+                    button.setBackgroundResource(R.drawable.button);
+                }
+
+                switch (dictModeButton.getText().toString()) {
+                    case "слова":
+                        dictModeButton.setBackgroundResource(R.drawable.active_word_button);
+                        wordDict.setLayoutParams(activeParams);
+                        markerDict.setLayoutParams(params);
+                        kanjiDict.setLayoutParams(params);
+                        break;
+
+                    case "маркеры":
+                        dictModeButton.setBackgroundResource(R.drawable.active_marker_button);
+                        wordDict.setLayoutParams(params);
+                        markerDict.setLayoutParams(activeParams);
+                        kanjiDict.setLayoutParams(params);
+                        break;
+
+                    case "кандзи":
+                        dictModeButton.setBackgroundResource(R.drawable.active_kanji_button);
+                        wordDict.setLayoutParams(params);
+                        markerDict.setLayoutParams(params);
+                        kanjiDict.setLayoutParams(activeParams);
+                        break;
+                }
+            });
+        }
     }
 
     private void newElem() {
@@ -120,6 +177,12 @@ public class App extends AppCompatActivity {
         Dictionary.addWord(
                 wordEdit.getText().toString(),
                 parseString(translationsEdit.getText().toString()),
+                descriptionEdit.getText().toString()
+        );
+
+        db.addWord(
+                wordEdit.getText().toString(),
+                translationsEdit.getText().toString(),
                 descriptionEdit.getText().toString()
         );
     }

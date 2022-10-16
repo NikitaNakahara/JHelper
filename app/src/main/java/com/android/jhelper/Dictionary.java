@@ -97,7 +97,7 @@ public class Dictionary {
             elemLayout.addView(descriptionLayout);
         }
 
-        wordsLayout.addView(elemLayout);
+        wordsLayout.addView(elemLayout, 0);
     }
 
     public static void addMarker() {
