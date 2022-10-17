@@ -17,83 +17,23 @@ public class Dictionary {
     private static Context context;
     private static LinearLayout wordsLayout;
     private static LinearLayout markersLayout;
+    private static LinearLayout kanjiLayout;
 
     public static void setContext(Context _context) { context = _context; }
     public static void setWordsLayout(LinearLayout _layout) { wordsLayout = _layout; }
     public static void setMarkersLayout(LinearLayout _layout) { markersLayout = _layout; }
+    public static void setKanjiLayout(LinearLayout _layout) { kanjiLayout = _layout; }
 
 
     public static void addWord(String text, String[] translations, String description) {
         LinearLayout elemLayout = createLayout();
 
-        TextView word = new TextView(context);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-        );
-        word.setLayoutParams(params);
-        word.setText(text);
-        word.setTextSize(23);
+        elemLayout.addView(createTextView(text));
 
-        elemLayout.addView(word);
-
-        LinearLayout translationsLayout = new LinearLayout(context);
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-        );
-        translationsLayout.setLayoutParams(layoutParams);
-        translationsLayout.setOrientation(LinearLayout.HORIZONTAL);
-
-        TextView translationsHeader = new TextView(context);
-        translationsHeader.setLayoutParams(params);
-        translationsHeader.setText("значения: ");
-        translationsHeader.setTextSize(17);
-
-        translationsLayout.addView(translationsHeader);
-
-        TextView translationsView = new TextView(context);
-        translationsView.setLayoutParams(params);
-        translationsView.setTextSize(17);
-        translationsView.setTextColor(Color.parseColor("#515253"));
-
-        StringBuilder translationsText = new StringBuilder();
-        for (int i = 0; i < translations.length; i++) {
-            if (i == 0) {
-                translationsText.append(translations[i]);
-            } else {
-                translationsText.append(", ").append(translations[i]);
-            }
-        }
-
-        translationsView.setText(translationsText);
-
-        translationsLayout.addView(translationsView);
-
-        elemLayout.addView(translationsLayout);
+        elemLayout.addView(createTextLayout("значения", translations));
 
         if (description.length() != 0) {
-            LinearLayout descriptionLayout = new LinearLayout(context);
-            descriptionLayout.setLayoutParams(layoutParams);
-            descriptionLayout.setOrientation(LinearLayout.HORIZONTAL);
-
-            TextView descriptionHeader = new TextView(context);
-            descriptionHeader.setLayoutParams(params);
-            descriptionHeader.setText("описание: ");
-            descriptionHeader.setTextSize(17);
-
-            descriptionLayout.addView(descriptionHeader);
-
-            TextView descriptionView = new TextView(context);
-            descriptionView.setLayoutParams(params);
-            descriptionView.setTextSize(17);
-            descriptionView.setTextColor(Color.parseColor("#515253"));
-
-            descriptionView.setText(description);
-
-            descriptionLayout.addView(descriptionView);
-
-            elemLayout.addView(descriptionLayout);
+            elemLayout.addView(createTextLayout("описание", new String[]{description}));
         }
 
         wordsLayout.addView(elemLayout, 0);
@@ -102,59 +42,26 @@ public class Dictionary {
     public static void addMarker(String text, String[] using) {
         LinearLayout elemLayout = createLayout();
 
-        TextView marker = new TextView(context);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-        );
-        marker.setLayoutParams(params);
-        marker.setText(text);
-        marker.setTextSize(23);
+        elemLayout.addView(createTextView(text));
 
-        elemLayout.addView(marker);
-
-
-        LinearLayout usingLayout = new LinearLayout(context);
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-        );
-        usingLayout.setLayoutParams(layoutParams);
-        usingLayout.setOrientation(LinearLayout.HORIZONTAL);
-
-        TextView usingHeader = new TextView(context);
-        usingHeader.setLayoutParams(params);
-        usingHeader.setText("применение: ");
-        usingHeader.setTextSize(17);
-
-        usingLayout.addView(usingHeader);
-
-        TextView usingView = new TextView(context);
-        usingView.setLayoutParams(params);
-        usingView.setTextSize(17);
-        usingView.setTextColor(Color.parseColor("#515253"));
-
-        StringBuilder usingText = new StringBuilder();
-        for (int i = 0; i < using.length; i++) {
-            if (i == 0) {
-                usingText.append(using[i]);
-            } else {
-                usingText.append(", ").append(using[i]);
-            }
-        }
-
-        usingView.setText(usingText);
-
-        usingLayout.addView(usingView);
-
-        elemLayout.addView(usingLayout);
+        elemLayout.addView(createTextLayout("применение", using));
 
         markersLayout.addView(elemLayout, 0);
     }
 
+    public static void addKanji(String kanji,
+                                String[] onyomi,
+                                String[] kunyomi,
+                                String[] translations
+    ) {
+        LinearLayout elemLayout = createLayout();
 
-    public static void addKanji() {
+        elemLayout.addView(createTextView(kanji));
+        elemLayout.addView(createTextLayout("он-ёми", onyomi));
+        elemLayout.addView(createTextLayout("кун-ёми", kunyomi));
+        elemLayout.addView(createTextLayout("значения", translations));
 
+        kanjiLayout.addView(elemLayout, 0);
     }
 
     private static LinearLayout createLayout() {
@@ -173,6 +80,57 @@ public class Dictionary {
         elemLayout.setLayoutParams(params);
 
         return elemLayout;
+    }
+
+    private static TextView createTextView(String text) {
+        TextView textView = new TextView(context);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        textView.setLayoutParams(params);
+        textView.setText(text);
+        textView.setTextSize(23);
+
+        return textView;
+    }
+
+    private static LinearLayout createTextLayout(String title, String[] strings) {
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+
+        LinearLayout textLayout = new LinearLayout(context);
+        textLayout.setLayoutParams(params);
+        textLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+        TextView titleView = new TextView(context);
+        titleView.setLayoutParams(params);
+        titleView.setText(title + ": ");
+        titleView.setTextSize(17);
+
+        textLayout.addView(titleView);
+
+        TextView textView = new TextView(context);
+        textView.setLayoutParams(params);
+        textView.setTextSize(17);
+        textView.setTextColor(Color.parseColor("#515253"));
+
+        StringBuilder text = new StringBuilder();
+        for (int i = 0; i < strings.length; i++) {
+            if (i == 0) {
+                text.append(strings[i]);
+            } else {
+                text.append(", ").append(strings[i]);
+            }
+        }
+
+        textView.setText(text);
+
+        textLayout.addView(textView);
+
+        return textLayout;
     }
 
     private static int dpToPx(int dp) {

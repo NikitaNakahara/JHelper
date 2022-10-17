@@ -18,6 +18,8 @@ import java.util.regex.Pattern;
 public class App extends AppCompatActivity {
     Database db = new Database(this);
 
+    String lastMode = "слово";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.Theme_JHelper);
@@ -33,9 +35,11 @@ public class App extends AppCompatActivity {
         Dictionary.setContext(this);
         Dictionary.setWordsLayout(findViewById(R.id.words_dict_layout));
         Dictionary.setMarkersLayout(findViewById(R.id.markers_dict_layout));
+        Dictionary.setKanjiLayout(findViewById(R.id.kanji_dict_layout));
 
         db.loadWords();
         db.loadMarkers();
+        db.loadKanji();
 
         findViewById(R.id.add_element).setOnClickListener(v -> {
             newElem();
@@ -96,7 +100,7 @@ public class App extends AppCompatActivity {
 
     private void newElem() {
         final String[] mode = new String[1];
-        mode[0] = "слово";
+        mode[0] = lastMode;
 
         ViewFlipper flipper = findViewById(R.id.flipper);
         flipper.showNext();
@@ -124,6 +128,7 @@ public class App extends AppCompatActivity {
         for (Button button : buttons) {
             button.setOnClickListener(v -> {
                 mode[0] = button.getText().toString();
+                lastMode = mode[0];
                 for (Button button1 : buttons) {
                     button1.setBackgroundResource(R.drawable.button);
                 }
@@ -204,7 +209,25 @@ public class App extends AppCompatActivity {
     }
 
     private void addKanji() {
+        EditText kanji = findViewById(R.id.kanji_text);
+        EditText onyomi = findViewById(R.id.on_yomi);
+        EditText kunyomi = findViewById(R.id.kun_yomi);
+        EditText translations = findViewById(R.id.knows_text);
 
+
+        Dictionary.addKanji(
+                kanji.getText().toString(),
+                parseString(onyomi.getText().toString()),
+                parseString(kunyomi.getText().toString()),
+                parseString(translations.getText().toString())
+        );
+
+        db.addKanji(
+                kanji.getText().toString(),
+                onyomi.getText().toString(),
+                kunyomi.getText().toString(),
+                translations.getText().toString()
+        );
     }
 
     private String[] parseString(String string) {

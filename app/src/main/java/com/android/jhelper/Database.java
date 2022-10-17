@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 public class Database extends SQLiteOpenHelper {
     private final String WORDS_TABLE_NAME = "WORDS";
     private final String MARKERS_TABLE_NAME = "MARKERS";
+    private final String KANJI_TABLE_NAME = "KANJI";
 
     private final String W_JAP_TEXT_COL = "JAP";
     private final String W_RUS_TEXT_COL = "RUS";
@@ -22,6 +23,11 @@ public class Database extends SQLiteOpenHelper {
 
     private final String M_TEXT_COL = "TEXT";
     private final String M_USING_COL = "USING_COL";
+
+    private final String K_KANJI_TEXT_COL = "KANJI_COL";
+    private final String K_ONYOMI_TEXT_COL = "ONYOMI";
+    private final String K_KUNYOMI_TEXT_COL = "KUNYOMI";
+    private final String K_TRANSL_TEXT_COL = "TRANSLATION";
 
     public Database(@Nullable Context context) {
         super(context, "dictionary.db", null, 1);
@@ -43,12 +49,22 @@ public class Database extends SQLiteOpenHelper {
                 M_USING_COL + " TEXT" +
                 ");"
         );
+
+        db.execSQL("CREATE TABLE " + KANJI_TABLE_NAME +
+                "(" +
+                K_KANJI_TEXT_COL + " TEXT," +
+                K_ONYOMI_TEXT_COL + " TEXT," +
+                K_KUNYOMI_TEXT_COL + " TEXT," +
+                K_TRANSL_TEXT_COL + " TEXT" +
+                ");"
+        );
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + WORDS_TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + MARKERS_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + KANJI_TABLE_NAME);
         onCreate(db);
     }
 
@@ -67,6 +83,16 @@ public class Database extends SQLiteOpenHelper {
         map.put(M_USING_COL, using);
 
         getWritableDatabase().insert(MARKERS_TABLE_NAME, null, map);
+    }
+
+    public void addKanji(String kanji, String onyomi, String kunyomi, String translations) {
+        ContentValues map = new ContentValues();
+        map.put(K_KANJI_TEXT_COL, kanji);
+        map.put(K_ONYOMI_TEXT_COL, onyomi);
+        map.put(K_KUNYOMI_TEXT_COL, kunyomi);
+        map.put(K_TRANSL_TEXT_COL, translations);
+
+        getWritableDatabase().insert(KANJI_TABLE_NAME, null, map);
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -137,7 +163,50 @@ public class Database extends SQLiteOpenHelper {
             protected void onProgressUpdate(String... strings) {
                 Dictionary.addMarker(
                         strings[0],
-                        strings[1]
+                        Pattern.compile("/").split(strings[1])
+                );
+            }
+        }.execute();
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    public void loadKanji() {
+        Cursor cursor = getReadableDatabase().rawQuery(
+                "SELECT " + K_KANJI_TEXT_COL +
+                        ", " + K_ONYOMI_TEXT_COL +
+                        ", " + K_KUNYOMI_TEXT_COL +
+                        ", " + K_TRANSL_TEXT_COL +
+                        " FROM " + KANJI_TABLE_NAME,
+                null);
+
+        new AsyncTask<Void, String, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                if(cursor.moveToFirst()) {
+                    do {
+                        int kanjiIndex = cursor.getColumnIndex(K_KANJI_TEXT_COL);
+                        int onyomiIndex = cursor.getColumnIndex(K_ONYOMI_TEXT_COL);
+                        int kunyomiIndex = cursor.getColumnIndex(K_KUNYOMI_TEXT_COL);
+                        int translationsIndex = cursor.getColumnIndex(K_TRANSL_TEXT_COL);
+                        String kanji = cursor.getString(kanjiIndex);
+                        String onyomi = cursor.getString(onyomiIndex);
+                        String kunyomi = cursor.getString(kunyomiIndex);
+                        String translations = cursor.getString(translationsIndex);
+
+                        publishProgress(kanji, onyomi, kunyomi, translations);
+                    } while (cursor.moveToNext());
+                }
+
+                return null;
+            }
+
+            @Override
+            protected void onProgressUpdate(String... strings) {
+                Dictionary.addKanji(
+                        strings[0],
+                        Pattern.compile("/").split(strings[1]),
+                        Pattern.compile("/").split(strings[2]),
+                        Pattern.compile("/").split(strings[3])
                 );
             }
         }.execute();

@@ -89,7 +89,7 @@
                 android:textSize="15sp"
                 android:padding="10dp"
                 android:gravity="center_vertical"
-                android:id="@+id/hieroglyph_text"/>
+                android:id="@+id/kanji_text"/>
             <EditText
                 android:layout_width="300dp"
                 android:layout_height="40dp"
@@ -99,7 +99,7 @@
                 android:textSize="15sp"
                 android:padding="10dp"
                 android:gravity="center_vertical"
-                android:id="@+id/on_read"/>
+                android:id="@+id/on_yomi"/>
             <EditText
                 android:layout_width="300dp"
                 android:layout_height="40dp"
@@ -109,7 +109,7 @@
                 android:textSize="15sp"
                 android:padding="10dp"
                 android:gravity="center_vertical"
-                android:id="@+id/kun_read"/>
+                android:id="@+id/kun_yomi"/>
             <EditText
                 android:layout_width="300dp"
                 android:layout_height="40dp"
