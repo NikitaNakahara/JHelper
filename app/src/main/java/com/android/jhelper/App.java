@@ -183,14 +183,9 @@ public class App extends AppCompatActivity {
         EditText descriptionEdit = findViewById(R.id.description_text);
         Dictionary.addWord(
                 wordEdit.getText().toString(),
-                parseString(translationsEdit.getText().toString()),
-                descriptionEdit.getText().toString()
-        );
-
-        db.addWord(
-                wordEdit.getText().toString(),
                 translationsEdit.getText().toString(),
-                descriptionEdit.getText().toString()
+                descriptionEdit.getText().toString(),
+                 true
         );
     }
 
@@ -199,12 +194,8 @@ public class App extends AppCompatActivity {
         EditText using = findViewById(R.id.using_text);
         Dictionary.addMarker(
                 marker.getText().toString(),
-                parseString(using.getText().toString())
-        );
-
-        db.addMarker(
-                marker.getText().toString(),
-                using.getText().toString()
+                using.getText().toString(),
+                true
         );
     }
 
@@ -214,24 +205,13 @@ public class App extends AppCompatActivity {
         EditText kunyomi = findViewById(R.id.kun_yomi);
         EditText translations = findViewById(R.id.knows_text);
 
-
         Dictionary.addKanji(
-                kanji.getText().toString(),
-                parseString(onyomi.getText().toString()),
-                parseString(kunyomi.getText().toString()),
-                parseString(translations.getText().toString())
-        );
-
-        db.addKanji(
                 kanji.getText().toString(),
                 onyomi.getText().toString(),
                 kunyomi.getText().toString(),
-                translations.getText().toString()
+                translations.getText().toString(),
+                true
         );
-    }
-
-    private String[] parseString(String string) {
-        return Pattern.compile("/").split(string);
     }
 
     public int dpToPx(int dp) {

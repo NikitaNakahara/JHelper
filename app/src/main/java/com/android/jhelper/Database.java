@@ -17,6 +17,8 @@ public class Database extends SQLiteOpenHelper {
     private final String MARKERS_TABLE_NAME = "MARKERS";
     private final String KANJI_TABLE_NAME = "KANJI";
 
+    private final String ID_COL = "ID_COL";
+
     private final String W_JAP_TEXT_COL = "JAP";
     private final String W_RUS_TEXT_COL = "RUS";
     private final String W_DESC_TEXT_COL = "DESCRIPTION";
@@ -37,6 +39,7 @@ public class Database extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " + WORDS_TABLE_NAME +
                 "(" +
+                ID_COL + " INTEGER," +
                 W_JAP_TEXT_COL + " TEXT," +
                 W_RUS_TEXT_COL + " TEXT," +
                 W_DESC_TEXT_COL + " TEXT" +
@@ -45,6 +48,7 @@ public class Database extends SQLiteOpenHelper {
 
         db.execSQL("CREATE TABLE " + MARKERS_TABLE_NAME +
                 "(" +
+                ID_COL + " INTEGER, " +
                 M_TEXT_COL + " TEXT," +
                 M_USING_COL + " TEXT" +
                 ");"
@@ -52,6 +56,7 @@ public class Database extends SQLiteOpenHelper {
 
         db.execSQL("CREATE TABLE " + KANJI_TABLE_NAME +
                 "(" +
+                ID_COL + " INTEGER, " +
                 K_KANJI_TEXT_COL + " TEXT," +
                 K_ONYOMI_TEXT_COL + " TEXT," +
                 K_KUNYOMI_TEXT_COL + " TEXT," +
@@ -68,8 +73,9 @@ public class Database extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void addWord(String text, String translations, String description) {
+    public void addWord(int id, String text, String translations, String description) {
         ContentValues map = new ContentValues();
+        map.put(ID_COL, id);
         map.put(W_JAP_TEXT_COL, text);
         map.put(W_RUS_TEXT_COL, translations);
         map.put(W_DESC_TEXT_COL, description);
@@ -77,16 +83,18 @@ public class Database extends SQLiteOpenHelper {
         getWritableDatabase().insert(WORDS_TABLE_NAME, null, map);
     }
 
-    public void addMarker(String text, String using) {
+    public void addMarker(int id, String text, String using) {
         ContentValues map = new ContentValues();
+        map.put(ID_COL, id);
         map.put(M_TEXT_COL, text);
         map.put(M_USING_COL, using);
 
         getWritableDatabase().insert(MARKERS_TABLE_NAME, null, map);
     }
 
-    public void addKanji(String kanji, String onyomi, String kunyomi, String translations) {
+    public void addKanji(int id, String kanji, String onyomi, String kunyomi, String translations) {
         ContentValues map = new ContentValues();
+        map.put(ID_COL, id);
         map.put(K_KANJI_TEXT_COL, kanji);
         map.put(K_ONYOMI_TEXT_COL, onyomi);
         map.put(K_KUNYOMI_TEXT_COL, kunyomi);
@@ -127,8 +135,9 @@ public class Database extends SQLiteOpenHelper {
             protected void onProgressUpdate(String... strings) {
                 Dictionary.addWord(
                         strings[0],
-                        Pattern.compile("/").split(strings[1]),
-                        strings[2]
+                        strings[1],
+                        strings[2],
+                        false
                 );
             }
         }.execute();
@@ -163,7 +172,8 @@ public class Database extends SQLiteOpenHelper {
             protected void onProgressUpdate(String... strings) {
                 Dictionary.addMarker(
                         strings[0],
-                        Pattern.compile("/").split(strings[1])
+                        strings[1],
+                        false
                 );
             }
         }.execute();
@@ -204,11 +214,36 @@ public class Database extends SQLiteOpenHelper {
             protected void onProgressUpdate(String... strings) {
                 Dictionary.addKanji(
                         strings[0],
-                        Pattern.compile("/").split(strings[1]),
-                        Pattern.compile("/").split(strings[2]),
-                        Pattern.compile("/").split(strings[3])
+                        strings[1],
+                        strings[2],
+                        strings[3],
+                        false
                 );
             }
         }.execute();
+    }
+
+    public void deleteWord(int id) {
+        getWritableDatabase().delete(
+                WORDS_TABLE_NAME,
+                ID_COL + " = " + id,
+                null
+        );
+    }
+
+    public void deleteMarker(int id) {
+        getWritableDatabase().delete(
+                MARKERS_TABLE_NAME,
+                ID_COL + " = " + id,
+                null
+        );
+    }
+
+    public void deleteKanji(int id) {
+        getWritableDatabase().delete(
+                KANJI_TABLE_NAME,
+                ID_COL + " = " + id,
+                null
+        );
     }
 }
