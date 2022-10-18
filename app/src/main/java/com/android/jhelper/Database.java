@@ -223,6 +223,36 @@ public class Database extends SQLiteOpenHelper {
         }.execute();
     }
 
+    public void updateWord(int id, String jap, String rus, String desc) {
+        ContentValues map = new ContentValues();
+        map.put(ID_COL, id);
+        map.put(W_JAP_TEXT_COL, jap);
+        map.put(W_RUS_TEXT_COL, rus);
+        map.put(W_DESC_TEXT_COL, desc);
+
+        getWritableDatabase().update(WORDS_TABLE_NAME, map, ID_COL + " = " + id, null);
+    }
+
+    public void updateMarker(int id, String marker, String using) {
+        ContentValues map = new ContentValues();
+        map.put(ID_COL, id);
+        map.put(M_TEXT_COL, marker);
+        map.put(M_USING_COL, using);
+
+        getWritableDatabase().update(MARKERS_TABLE_NAME, map, ID_COL + " = " + id, null);
+    }
+
+    public void updateKanji(int id, String kanji, String onyomi, String kunyomi, String knows) {
+        ContentValues map = new ContentValues();
+        map.put(ID_COL, id);
+        map.put(K_KANJI_TEXT_COL, kanji);
+        map.put(K_ONYOMI_TEXT_COL, onyomi);
+        map.put(K_KUNYOMI_TEXT_COL, kunyomi);
+        map.put(K_TRANSL_TEXT_COL, knows);
+
+        getWritableDatabase().update(KANJI_TABLE_NAME, map, ID_COL + " = " + id, null);
+    }
+
     public void deleteWord(int id) {
         getWritableDatabase().delete(
                 WORDS_TABLE_NAME,
