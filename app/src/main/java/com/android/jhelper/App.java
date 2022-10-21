@@ -2,15 +2,22 @@ package com.android.jhelper;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.animation.ValueAnimator;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.TypedValue;
+import android.view.KeyEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import java.util.regex.Pattern;
@@ -19,6 +26,7 @@ public class App extends AppCompatActivity {
     Database db = new Database(this);
 
     String lastMode = "слово";
+    LinearLayout lastLayout = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +41,7 @@ public class App extends AppCompatActivity {
         setContentView(R.layout.flipper);
 
         Dictionary.setContext(this);
+
         Dictionary.setWordsLayout(findViewById(R.id.words_dict_layout));
         Dictionary.setMarkersLayout(findViewById(R.id.markers_dict_layout));
         Dictionary.setKanjiLayout(findViewById(R.id.kanji_dict_layout));
@@ -41,8 +50,27 @@ public class App extends AppCompatActivity {
         db.loadMarkers();
         db.loadKanji();
 
-        findViewById(R.id.add_element).setOnClickListener(v -> {
-            newElem();
+        findViewById(R.id.add_element).setOnClickListener(v -> newElem());
+        final boolean[] searchIsShow = {false};
+
+        // search EditText update listener
+        EditText edit = findViewById(R.id.search_input);
+        edit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                Dictionary.search(s.toString());
+            }
+        });
+
+        findViewById(R.id.search).setOnClickListener(v -> {
+            search(searchIsShow[0]);
+            searchIsShow[0] = !searchIsShow[0];
         });
 
         Button[] dictModeButtons = new Button[] {
@@ -51,13 +79,12 @@ public class App extends AppCompatActivity {
                 findViewById(R.id.kanji_dict)
         };
 
-        RelativeLayout.LayoutParams activeParams = new RelativeLayout.LayoutParams(
+        LinearLayout.LayoutParams activeParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         );
-        activeParams.setMargins(0, dpToPx(103), 0, 0);
 
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 0,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         );
@@ -74,6 +101,7 @@ public class App extends AppCompatActivity {
 
                 switch (dictModeButton.getText().toString()) {
                     case "слова":
+                        lastLayout = (LinearLayout) wordDict.getChildAt(0);
                         dictModeButton.setBackgroundResource(R.drawable.active_word_button);
                         wordDict.setLayoutParams(activeParams);
                         markerDict.setLayoutParams(params);
@@ -81,6 +109,7 @@ public class App extends AppCompatActivity {
                         break;
 
                     case "маркеры":
+                        lastLayout = (LinearLayout) markerDict.getChildAt(0);
                         dictModeButton.setBackgroundResource(R.drawable.active_marker_button);
                         wordDict.setLayoutParams(params);
                         markerDict.setLayoutParams(activeParams);
@@ -88,6 +117,7 @@ public class App extends AppCompatActivity {
                         break;
 
                     case "кандзи":
+                        lastLayout = (LinearLayout) kanjiDict.getChildAt(0);
                         dictModeButton.setBackgroundResource(R.drawable.active_kanji_button);
                         wordDict.setLayoutParams(params);
                         markerDict.setLayoutParams(params);
@@ -98,12 +128,56 @@ public class App extends AppCompatActivity {
         }
     }
 
+    private void search(boolean searchIsShow) {
+        if (!searchIsShow) {
+            showSearch();
+        } else {
+            hiddenSearch();
+        }
+    }
+
+    private void showSearch() {
+        LinearLayout searchLayout = findViewById(R.id.search_layout);
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) searchLayout.getLayoutParams();
+        LinearLayout dictLayout = findViewById(R.id.dict_layout);
+        RelativeLayout.LayoutParams dictParams = (RelativeLayout.LayoutParams) dictLayout.getLayoutParams();
+
+        ValueAnimator anim = ValueAnimator.ofInt(dpToPx(61), dpToPx(103));
+        anim.setDuration(200);
+        anim.addUpdateListener(animation -> {
+            params.setMargins(0, (int)animation.getAnimatedValue(), 0, 0);
+            searchLayout.setLayoutParams(params);
+            dictParams.setMargins(0, (int)animation.getAnimatedValue() + 75, 0, 0);
+            dictLayout.setLayoutParams(dictParams);
+        });
+        anim.start();
+    }
+
+    private void hiddenSearch() {
+        LinearLayout searchLayout = findViewById(R.id.search_layout);
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) searchLayout.getLayoutParams();
+        LinearLayout dictLayout = findViewById(R.id.dict_layout);
+        RelativeLayout.LayoutParams dictParams = (RelativeLayout.LayoutParams) dictLayout.getLayoutParams();
+
+        ValueAnimator anim = ValueAnimator.ofInt(dpToPx(103), dpToPx(61));
+        anim.setDuration(200);
+        anim.addUpdateListener(animation -> {
+            params.setMargins(0, (int)animation.getAnimatedValue(), 0, 0);
+            searchLayout.setLayoutParams(params);
+            dictParams.setMargins(0, (int)animation.getAnimatedValue() + 75, 0, 0);
+            dictLayout.setLayoutParams(dictParams);
+        });
+        anim.start();
+    }
+
     private void newElem() {
         final String[] mode = new String[1];
         mode[0] = lastMode;
 
         ViewFlipper flipper = findViewById(R.id.flipper);
         flipper.showNext();
+
+        findViewById(R.id.back_to_dict).setOnClickListener(v -> flipper.showPrevious());
 
         Button[] buttons = new Button[] {
             findViewById(R.id.word_mode),

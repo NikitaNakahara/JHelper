@@ -4,6 +4,8 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.ViewGroup;
@@ -11,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +34,7 @@ public class Dictionary {
     private static final int KANJI = 3;
 
     private static Context context;
+
     private static LinearLayout wordsLayout;
     private static LinearLayout markersLayout;
     private static LinearLayout kanjiLayout;
@@ -43,10 +47,10 @@ public class Dictionary {
         context = _context;
         db = new Database(context);
     }
+
     public static void setWordsLayout(LinearLayout _layout) { wordsLayout = _layout; }
     public static void setMarkersLayout(LinearLayout _layout) { markersLayout = _layout; }
     public static void setKanjiLayout(LinearLayout _layout) { kanjiLayout = _layout; }
-
 
     public static void addWord(String text, String translations, String description, boolean addToDB) {
         LinearLayout elemLayout = createLayout(WORDS);
@@ -65,12 +69,14 @@ public class Dictionary {
 
         if (addToDB) {
             db.addWord(
-                    lastWordIndex++,
+                    lastWordIndex,
                     text,
                     translations,
                     description
             );
         }
+
+        lastWordIndex++;
     }
 
     public static void addMarker(String text, String using, boolean addToDB) {
@@ -86,11 +92,13 @@ public class Dictionary {
 
         if (addToDB) {
             db.addMarker(
-                    lastMarkerIndex++,
+                    lastMarkerIndex,
                     text,
                     using
             );
         }
+
+        lastMarkerIndex++;
     }
 
     public static void addKanji(String kanji,
@@ -112,12 +120,130 @@ public class Dictionary {
 
         if (addToDB) {
             db.addKanji(
-                    lastKanjiIndex++,
+                    lastKanjiIndex,
                     kanji,
                     onyomi,
                     kunyomi,
                     translations
             );
+        }
+
+        lastKanjiIndex++;
+    }
+
+    public static void search(String text) {
+        searchWords(text);
+        searchMarkers(text);
+        searchKanji(text);
+    }
+
+    private static void searchWords(String text) {
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+
+        LinearLayout.LayoutParams hiddenParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                0
+        );
+
+        for (int i = 0; i < wordsLayout.getChildCount(); i++) {
+            LinearLayout wordsElem = (LinearLayout) wordsLayout.getChildAt(i);
+
+            TextView word = (TextView) wordsElem.getChildAt(2);
+            LinearLayout rusLayout = (LinearLayout) wordsElem.getChildAt(3);
+            TextView rus = (TextView) rusLayout.getChildAt(1);
+            LinearLayout descLayout = (LinearLayout) wordsElem.getChildAt(4);
+            TextView desc = null;
+            if (descLayout != null) {
+                desc = (TextView) descLayout.getChildAt(1);
+            }
+
+            if (desc != null) {
+                if (
+                        word.getText().toString().contains(text) ||
+                        rus.getText().toString().contains(text) ||
+                        desc.getText().toString().contains(text)
+                ) {
+                    wordsElem.setLayoutParams(params);
+                } else {
+                    wordsElem.setLayoutParams(hiddenParams);
+                }
+            } else {
+                if (
+                        word.getText().toString().contains(text) ||
+                        rus.getText().toString().contains(text)
+                ) {
+                    wordsElem.setLayoutParams(params);
+                } else {
+                    wordsElem.setLayoutParams(hiddenParams);
+                }
+            }
+        }
+    }
+
+    private static void searchMarkers(String text) {
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+
+        LinearLayout.LayoutParams hiddenParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                0
+        );
+
+        for (int i = 0; i < markersLayout.getChildCount(); i++) {
+            LinearLayout markersElem = (LinearLayout) markersLayout.getChildAt(i);
+
+            TextView marker = (TextView) markersElem.getChildAt(2);
+            LinearLayout usingLayout = (LinearLayout) markersElem.getChildAt(3);
+            TextView using = (TextView) usingLayout.getChildAt(1);
+
+            if (
+                    marker.getText().toString().contains(text) ||
+                    using.getText().toString().contains(text)
+            ) {
+                markersElem.setLayoutParams(params);
+            } else {
+                markersElem.setLayoutParams(hiddenParams);
+            }
+        }
+    }
+
+    private static void searchKanji(String text) {
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+
+        LinearLayout.LayoutParams hiddenParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                0
+        );
+
+        for (int i = 0; i < kanjiLayout.getChildCount(); i++) {
+            LinearLayout kanjiElem = (LinearLayout) kanjiLayout.getChildAt(i);
+
+            TextView kanji = (TextView) kanjiElem.getChildAt(2);
+            LinearLayout onyomiLayout = (LinearLayout) kanjiElem.getChildAt(3);
+            TextView onyomi = (TextView) onyomiLayout.getChildAt(1);
+            LinearLayout kunyomiLayout = (LinearLayout) kanjiElem.getChildAt(4);
+            TextView kunyomi = (TextView) kunyomiLayout.getChildAt(1);
+            LinearLayout knowsLayout = (LinearLayout) kanjiElem.getChildAt(5);
+            TextView knows = (TextView) knowsLayout.getChildAt(1);
+
+            if (
+                    kanji.getText().toString().contains(text) ||
+                    onyomi.getText().toString().contains(text) ||
+                    kunyomi.getText().toString().contains(text) ||
+                    knows.getText().toString().contains(text)
+            ) {
+                kanjiElem.setLayoutParams(params);
+            } else {
+                kanjiElem.setLayoutParams(hiddenParams);
+            }
         }
     }
 
@@ -140,8 +266,6 @@ public class Dictionary {
 
         createRefactorLayout(refactorLayout, parent);
 
-        elemLayout.addView(refactorLayout);
-
         elemLayout.setOrientation(LinearLayout.VERTICAL);
         elemLayout.setPadding(
                 dpToPx(15),
@@ -161,7 +285,7 @@ public class Dictionary {
         delete.setOnClickListener(v -> {
             switch (parent) {
                 case WORDS: {
-                    TextView text = (TextView)elemLayout.getChildAt(1);
+                    TextView text = (TextView) elemLayout.getChildAt(2);
                     int id = wordsMap.get(text.getText());
                     wordsMap.remove(text.getText());
                     db.deleteWord(id);
@@ -223,7 +347,9 @@ public class Dictionary {
         );
         buttons.setLayoutParams(buttonsParams);
 
+
         elemLayout.addView(buttons);
+        elemLayout.addView(refactorLayout);
 
         elemLayout.setOnClickListener(v -> {
             if (!refactorIsOpen[0]) {

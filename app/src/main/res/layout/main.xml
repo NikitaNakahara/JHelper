@@ -19,10 +19,34 @@
             <Button
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:background="@drawable/add_word_button_bg"
+                android:background="@drawable/search_button"
+                android:id="@+id/search"
+                android:layout_marginEnd="10dp"/>
+            <Button
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/add_word_button"
                 android:id="@+id/add_element"/>
         </LinearLayout>
     </RelativeLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="61dp"
+        android:paddingVertical="4dp"
+        android:paddingHorizontal="60dp"
+        android:gravity="center"
+        android:background="@color/black"
+        android:id="@+id/search_layout">
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:background="@drawable/word_input"
+            android:hint="поиск"
+            android:paddingHorizontal="10dp"
+            android:imeOptions="actionSearch"
+            android:id="@+id/search_input"/>
+    </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -53,43 +77,47 @@
             android:background="@drawable/button"
             android:id="@+id/kanji_dict"/>
     </LinearLayout>
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="103dp"
-        android:id="@+id/words_scroll">
-        <LinearLayout
+        android:orientation="horizontal"
+        android:id="@+id/dict_layout"
+        android:layout_marginTop="103dp">
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:divider="@drawable/divider"
-            android:showDividers="middle"
-            android:id="@+id/words_dict_layout"/>
-    </ScrollView>
-    <ScrollView
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="103dp"
-        android:id="@+id/markers_scroll">
-        <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/words_scroll">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:divider="@drawable/divider"
+                android:showDividers="middle"
+                android:id="@+id/words_dict_layout"/>
+        </ScrollView>
+        <ScrollView
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:divider="@drawable/divider"
-            android:showDividers="middle"
-            android:id="@+id/markers_dict_layout"/>
-    </ScrollView>
-    <ScrollView
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="103dp"
-        android:id="@+id/kanji_scroll">
-        <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/markers_scroll">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:divider="@drawable/divider"
+                android:showDividers="middle"
+                android:id="@+id/markers_dict_layout"/>
+        </ScrollView>
+        <ScrollView
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:divider="@drawable/divider"
-            android:showDividers="middle"
-            android:id="@+id/kanji_dict_layout"/>
-    </ScrollView>
+            android:id="@+id/kanji_scroll">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:divider="@drawable/divider"
+                android:showDividers="middle"
+                android:id="@+id/kanji_dict_layout"/>
+        </ScrollView>
+    </LinearLayout>
 </RelativeLayout>
